@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WESTVISION ARTS</title>
+</head>
+<body>
+    <h1>Karibu WESTVISION ARTS</h1>
+    <p>Mfumo upo hewani na unafanya kazi vizuri!</p>
+
+    <!-- Msimbo wa GPS kwa ajili ya kumjua mtumiaji alipo -->
+    <script>
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+            
+            // Inatuma taarifa za eneo moja kwa moja kwenye app yako ya Flask
+            fetch('/save-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ latitude: lat, longitude: lon })
+            });
+        });
+    }
+    </script>
+</body>
+</html>
