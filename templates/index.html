@@ -2,571 +2,1032 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WESTVISION ARTS</title>
-    
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="theme-color" content="#4a0e4e">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101828">
+    <title>VibeChat | Group Chat</title>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --primary: #4a0e4e;
-            --primary-dark: #300833;
-            --accent: #ffd700;
-            --bg-chat: #e5ddd5;
-            --msg-in: #ffffff;
-            --msg-out: #dcf8c6;
-            --text-main: #000000;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        html, body {
-            margin: 0; padding: 0;
-            width: 100vw; height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--primary-dark);
-            color: var(--text-main);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* HEADER */
-        header {
-            background: var(--primary);
-            color: #ffffff;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            z-index: 20;
-            flex-shrink: 0;
-            width: 100%;
-        }
-
-        header h1 {
+        * {
+            box-sizing: border-box;
             margin: 0;
-            font-size: 19px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: 0.5px;
+            padding: 0;
         }
 
-        header p {
-            margin: 2px 0 0;
-            font-size: 11px;
-            color: var(--accent);
-            font-weight: 600;
+        :root {
+            --background: #0b1120;
+            --panel: #121c30;
+            --panel-light: #1b2940;
+            --purple: #7857ff;
+            --green: #23c9a7;
+            --text: #f5f7ff;
+            --muted: #94a3b8;
+            --border: rgba(255,255,255,.09);
         }
 
-        /* NAVIGATION TABS */
-        .nav-tabs {
-            display: flex;
-            background: var(--primary-dark);
-            flex-shrink: 0;
-            width: 100%;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
         }
 
-        .tab-btn {
-            flex: 1;
-            padding: 12px 4px;
-            color: #d1c4e9;
-            background: none;
-            border: none;
-            font-weight: 700;
+        button, input, textarea {
+            font: inherit;
+        }
+
+        button {
             cursor: pointer;
-            font-size: 14px;
-            text-align: center;
-            border-bottom: 4px solid transparent;
         }
 
-        .tab-btn.active {
-            color: #ffffff;
-            border-bottom-color: var(--accent);
-            background: rgba(255, 255, 255, 0.08);
+        .app {
+            width: 100%;
+            max-width: 1500px;
+            height: 100vh;
+            margin: auto;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 16px;
         }
 
-        /* MAIN CONTENT AREA */
-        .main-body {
-            flex: 1;
-            width: 100vw;
+        .sidebar {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            position: relative;
-            background: var(--bg-chat);
         }
 
-        /* LOGIN SCREEN */
-        #section-login {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 50;
-            background: linear-gradient(135deg, #4a0e4e, #1a0b2e);
+        .brand {
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
-            width: 100vw;
-            height: 100vh;
+            gap: 12px;
+            margin-bottom: 38px;
         }
 
-        .login-card {
-            background: #ffffff;
-            width: 100%;
-            max-width: 380px;
-            padding: 25px;
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            text-align: center;
-        }
-
-        .login-card h2 {
-            margin-top: 0;
-            color: var(--primary);
+            background: linear-gradient(135deg, #9b7bff, #6242ee);
             font-size: 24px;
         }
 
-        input, textarea {
+        .brand h1 {
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .brand p {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .menu-title {
+            color: #71809a;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0 10px 12px;
+        }
+
+        .nav-button {
             width: 100%;
             padding: 14px;
-            margin: 10px 0;
-            border: 2px solid #cccccc;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            color: #000000 !important;
-            background: #ffffff !important;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 14px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #aebbd0;
+            text-align: left;
         }
 
-        input:focus, textarea:focus {
-            border-color: var(--primary);
+        .nav-button:hover,
+        .nav-button.active {
+            background: #7857ff20;
+            border-color: #7857ff50;
+            color: white;
         }
 
-        .btn-action {
-            width: 100%;
-            padding: 14px;
-            margin-top: 10px;
-            background: var(--primary);
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
+        .nav-icon {
+            font-size: 20px;
         }
 
-        /* CHAT SECTION */
-        #tab-chat {
-            flex: 1;
-            width: 100%;
-            height: 100%;
+        .profile {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2dd4bf, #0f766e);
+            color: #052e2b;
+            font-weight: 800;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .online-status {
+            color: var(--green);
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .main {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
+            min-width: 0;
             overflow: hidden;
         }
 
-        #chat-messages {
-            flex: 1;
-            width: 100%;
-            padding: 15px;
-            overflow-y: auto;
+        .topbar {
+            min-height: 82px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background-color: #e5ddd5;
+            align-items: center;
+            gap: 14px;
         }
 
-        /* VIBOX VYA UJUMBE (BUBBLES) */
-        .msg-box {
-            max-width: 82%;
-            padding: 10px 14px;
-            border-radius: 14px;
-            background: var(--msg-in);
-            color: #000000;
-            font-size: 16px;
-            line-height: 1.4;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            align-self: flex-start;
-            word-break: break-word;
-            border: 1px solid #e0e0e0;
+        .room-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #7857ff, #a78bfa);
+            border-radius: 16px;
+            font-size: 23px;
         }
 
-        .msg-box.my-msg {
-            align-self: flex-end;
-            background: var(--msg-out);
-            border-color: #b7e4a1;
+        .room-info {
+            flex: 1;
         }
 
-        .msg-sender {
+        .room-info h2 {
+            font-size: 17px;
             font-weight: 800;
+        }
+
+        .room-info p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .content {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .content.active {
+            display: flex;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 35px 15px;
+            color: var(--muted);
+        }
+
+        .welcome .emoji {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .welcome h3 {
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 18px;
+        }
+
+        .message.mine {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #283650;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .message-body {
+            max-width: 75%;
+        }
+
+        .sender {
+            color: #aebbd0;
+            font-size: 11px;
+            margin: 0 0 6px 4px;
+        }
+
+        .bubble {
+            background: var(--panel-light);
+            border: 1px solid var(--border);
+            border-radius: 5px 17px 17px 17px;
+            padding: 12px 15px;
+            line-height: 1.6;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .message.mine .bubble {
+            background: linear-gradient(135deg, #7857ff, #6043df);
+            border: none;
+            border-radius: 17px 5px 17px 17px;
+            color: white;
+        }
+
+        .message-time {
+            text-align: right;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .emoji-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            overflow-x: auto;
+            border-top: 1px solid var(--border);
+        }
+
+        .emoji-button {
+            min-width: 42px;
+            height: 40px;
+            border: 1px solid var(--border);
+            background: #ffffff08;
+            border-radius: 12px;
+            font-size: 21px;
+        }
+
+        .emoji-button:hover {
+            background: #7857ff30;
+        }
+
+        .composer-area {
+            padding: 14px 20px 20px;
+            border-top: 1px solid var(--border);
+            background: #0e1728;
+        }
+
+        .composer {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 9px 10px 9px 15px;
+            border: 1px solid #34415a;
+            background: #172238;
+            border-radius: 18px;
+        }
+
+        .composer textarea {
+            flex: 1;
+            min-width: 0;
+            min-height: 40px;
+            max-height: 120px;
+            resize: none;
+            outline: none;
+            border: none;
+            color: white;
+            background: transparent;
+            padding: 10px 0;
+        }
+
+        .composer textarea::placeholder {
+            color: #8592a8;
+        }
+
+        .send-button {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 14px;
+            color: white;
+            background: linear-gradient(135deg, #9277ff, #6545eb);
+            font-size: 20px;
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 10px;
+            color: #71809a;
+            margin-top: 10px;
+        }
+
+        .panel-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+        }
+
+        .page-heading {
+            margin-bottom: 22px;
+        }
+
+        .page-heading h2 {
+            font-size: 23px;
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: var(--muted);
             font-size: 13px;
-            color: var(--primary);
-            margin-bottom: 3px;
+            line-height: 1.6;
+        }
+
+        .primary-button {
+            background: linear-gradient(135deg, #9277ff, #6545eb);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 700;
+        }
+
+        .card {
+            background: #ffffff05;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 14px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .field {
+            width: 100%;
+            margin: 8px 0;
+            padding: 13px;
+            border: 1px solid #34415a;
+            border-radius: 12px;
+            background: #0c1424;
+            color: white;
+            outline: none;
+        }
+
+        .field:focus {
+            border-color: var(--purple);
+        }
+
+        .secondary-button {
+            padding: 11px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #ffffff08;
+            color: white;
+        }
+
+        .announcement {
+            background: #ffffff05;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 18px;
+            margin-bottom: 13px;
+        }
+
+        .announcement h3 {
+            margin-bottom: 8px;
+        }
+
+        .announcement p {
+            white-space: pre-wrap;
+            color: #c7d1e1;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .coordinates {
+            margin: 15px 0;
+            padding: 13px;
+            border-radius: 12px;
+            background: #0b1322;
+            color: #b8aaff;
+            overflow-wrap: anywhere;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: #111827;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            display: none;
+            z-index: 100;
+        }
+
+        .toast.show {
             display: block;
         }
 
-        .msg-time {
-            font-size: 11px;
-            color: #555555;
-            float: right;
-            margin-top: 6px;
-            margin-left: 10px;
+        @media(max-width:800px) {
+            .app {
+                display: flex;
+                flex-direction: column;
+                height: 100dvh;
+                padding: 0;
+                gap: 0;
+            }
+
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 7px 10px max(7px, env(safe-area-inset-bottom));
+                border-radius: 18px 18px 0 0;
+                border-bottom: none;
+                background: #111b2cf5;
+                backdrop-filter: blur(15px);
+            }
+
+            .brand, .menu-title, .profile {
+                display: none;
+            }
+
+            .nav {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+            }
+
+            .nav-button {
+                margin: 0;
+                padding: 9px 3px;
+                flex-direction: column;
+                justify-content: center;
+                gap: 4px;
+                text-align: center;
+                font-size: 10px;
+            }
+
+            .nav-icon {
+                font-size: 19px;
+            }
+
+            .main {
+                flex: 1;
+                height: calc(100dvh - 72px);
+                border: none;
+                border-radius: 0;
+            }
+
+            .topbar {
+                padding: 12px 15px;
+                min-height: 72px;
+            }
+
+            .messages {
+                padding: 18px 13px;
+            }
+
+            .message-body {
+                max-width: 84%;
+            }
+
+            .composer-area {
+                padding: 10px 12px 12px;
+            }
+
+            .panel-scroll {
+                padding: 18px 14px;
+            }
         }
-
-        /* STICKER / EMOJI BAR */
-        .sticker-bar {
-            background: #f0f0f0;
-            padding: 8px 12px;
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            border-top: 1px solid #dddddd;
-            flex-shrink: 0;
-            width: 100%;
-        }
-
-        .sticker-btn {
-            font-size: 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 2px 6px;
-            flex-shrink: 0;
-        }
-
-        .sticker-btn:active { transform: scale(1.3); }
-
-        /* INPUT BAR AT THE BOTTOM */
-        .chat-bottom-bar {
-            padding: 10px 14px;
-            background: #ffffff;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            border-top: 2px solid #cccccc;
-            flex-shrink: 0;
-            width: 100%;
-        }
-
-        .chat-bottom-bar input {
-            margin: 0;
-            border-radius: 25px;
-            border: 2px solid #aaaaaa;
-            padding: 12px 18px;
-            font-size: 16px;
-            color: #000000 !important;
-            background: #f9f9f9 !important;
-            flex: 1;
-        }
-
-        .send-btn-round {
-            background: var(--primary);
-            color: #ffffff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        /* ANNOUNCEMENTS & GPS VIEWS */
-        #tab-announcements, #tab-gps {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            padding: 15px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        .ann-card, .gps-card {
-            background: #ffffff;
-            border-left: 6px solid var(--accent);
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 14px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-            color: #000000;
-        }
-
-        .ann-card h4, .gps-card h4 { margin: 0 0 6px 0; color: var(--primary); font-size: 18px; }
-        .ann-card p, .gps-card p { margin: 0; font-size: 15px; color: #222222; line-height: 1.4; }
-
-        .hidden { display: none !important; }
     </style>
 </head>
+
 <body>
-    <!-- HEADER -->
-    <header>
-        <div>
-            <h1>WESTVISION ARTS</h1>
-            <p>Tanganyika Magharibi App</p>
-        </div>
-        <div id="user-display" style="font-size: 14px; font-weight: bold; color: var(--accent);"></div>
-    </header>
+<div class="app">
 
-    <div class="main-body">
-        <!-- LOGIN OVERLAY -->
-        <div id="section-login">
-            <div class="login-card">
-                <h2>Ingia kwenye App</h2>
-                <p style="font-size: 14px; color: #555; margin-bottom: 15px;">Ingiza taarifa kuanza kuchat na kufuatilia matangazo</p>
-                <input type="text" id="username" placeholder="Jina la mtumiaji" value="tanganyika">
-                <input type="password" id="password" placeholder="PIN au Password" value="11223344">
-                <button class="btn-action" onclick="loginApp()">INGIA SASA</button>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">✦</div>
+            <div>
+                <h1>VibeChat</h1>
+                <p>Unganisha watu</p>
             </div>
         </div>
 
-        <!-- DASHBOARD CONTAINER -->
-        <div id="section-app" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column;">
-            <div class="nav-tabs">
-                <button class="tab-btn active" onclick="switchTab('chat')">Group Chat</button>
-                <button class="tab-btn" onclick="switchTab('announcements')">Matangazo</button>
-                <button class="tab-btn" onclick="switchTab('gps')">GPS Locations</button>
+        <div class="menu-title">MENYU KUU</div>
+
+        <nav class="nav">
+            <button class="nav-button active" data-tab="chat">
+                <span class="nav-icon">💬</span> Group Chat
+            </button>
+
+            <button class="nav-button" data-tab="announcements">
+                <span class="nav-icon">📢</span> Matangazo
+            </button>
+
+            <button class="nav-button" data-tab="locations">
+                <span class="nav-icon">📍</span> GPS Locations
+            </button>
+        </nav>
+
+        <div class="profile">
+            <div class="avatar" id="profileAvatar">M</div>
+            <div>
+                <div class="profile-name" id="profileName">Mgeni</div>
+                <div class="online-status">● Uko mtandaoni</div>
             </div>
-
-            <!-- 1. GROUP CHAT TAB -->
-            <div id="tab-chat">
-                <div id="chat-messages"></div>
-
-                <!-- STICKERS / EMOJI QUICK SELECT -->
-                <div class="sticker-bar">
-                    <button class="sticker-btn" onclick="sendSticker('🎭')">🎭</button>
-                    <button class="sticker-btn" onclick="sendSticker('🎬')">🎬</button>
-                    <button class="sticker-btn" onclick="sendSticker('🔥')">🔥</button>
-                    <button class="sticker-btn" onclick="sendSticker('👏')">👏</button>
-                    <button class="sticker-btn" onclick="sendSticker('❤️')">❤️</button>
-                    <button class="sticker-btn" onclick="sendSticker('🎨')">🎨</button>
-                    <button class="sticker-btn" onclick="sendSticker('🎤')">🎤</button>
-                    <button class="sticker-btn" onclick="sendSticker('😂')">😂</button>
-                    <button class="sticker-btn" onclick="sendSticker('👍')">👍</button>
-                </div>
-
-                <!-- INPUT BAR -->
-                <div class="chat-bottom-bar">
-                    <input type="text" id="chat-input" placeholder="Andika ujumbe hapa..." onkeypress="if(event.key==='Enter') sendGroupMessage()">
-                    <button class="send-btn-round" onclick="sendGroupMessage()">Tuma</button>
-                </div>
-            </div>
-
-            <!-- 2. ANNOUNCEMENTS TAB -->
-            <div id="tab-announcements" class="hidden">
-                <div style="background:#fff; padding:16px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-                    <h4 style="margin:0 0 10px 0; color:var(--primary);">Weka Tangazo Jipya</h4>
-                    <input type="text" id="ann-title" placeholder="Kichwa cha Tangazo">
-                    <textarea id="ann-text" placeholder="Maelezo ya tangazo..." rows="3"></textarea>
-                    <input type="text" id="ann-link" placeholder="Link ya kazi (https://...)">
-                    <button class="btn-action" onclick="createAnnouncement()">Chapisha Tangazo</button>
-                </div>
-                <h3 style="font-size:16px; color:var(--primary); margin-bottom:10px;">Matangazo ya Hivi Karibuni</h3>
-                <div id="announcements-list"></div>
-            </div>
-
-            <!-- 3. GPS TAB -->
-            <div id="tab-gps" class="hidden">
-                <h3 style="font-size:17px; color:var(--primary); margin-top:0;">Taarifa za Maeneo ya GPS</h3>
-                <div id="gps-status" style="margin-bottom:12px; font-size:14px; color:#444; font-weight:600;">Inatafuta eneo lako...</div>
-                <div id="gps-locations-list"></div>
-            </div>
+            <button id="changeName" class="secondary-button" style="margin-left:auto">✎</button>
         </div>
-    </div>
+    </aside>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
-        }
+    <main class="main">
+        <header class="topbar">
+            <div class="room-icon" id="roomIcon">💬</div>
+            <div class="room-info">
+                <h2 id="roomTitle">Group Chat</h2>
+                <p id="roomSubtitle">Sehemu ya mazungumzo ya jamii</p>
+            </div>
+        </header>
 
-        let socket = null;
-        let currentUser = '';
+        <section class="content active" id="chatPanel">
+            <div class="messages" id="messages">
+                <div class="welcome" id="welcome">
+                    <div class="emoji">💬</div>
+                    <h3>Karibu VibeChat!</h3>
+                    <p>Andika ujumbe wako kuanza mazungumzo.</p>
+                </div>
+            </div>
 
-        window.onload = function() {
-            fetch('/api/me').then(res => res.json()).then(data => {
-                if (data.auth) {
-                    currentUser = data.username;
-                    showAppUI();
-                }
-            });
+            <div class="emoji-bar">
+                <button class="emoji-button" data-emoji="🎭">🎭</button>
+                <button class="emoji-button" data-emoji="🎬">🎬</button>
+                <button class="emoji-button" data-emoji="🔥">🔥</button>
+                <button class="emoji-button" data-emoji="👏">👏</button>
+                <button class="emoji-button" data-emoji="❤️">❤️</button>
+                <button class="emoji-button" data-emoji="😂">😂</button>
+                <button class="emoji-button" data-emoji="🥳">🥳</button>
+                <button class="emoji-button" data-emoji="🙏">🙏</button>
+            </div>
+
+            <div class="composer-area">
+                <form class="composer" id="messageForm">
+                    <textarea id="messageInput" rows="1"
+                        placeholder="Andika ujumbe wako hapa..."
+                        maxlength="2000"></textarea>
+                    <button type="submit" class="send-button">➤</button>
+                </form>
+                <div class="hint">Enter kutuma · Shift + Enter kwenda mstari mpya</div>
+            </div>
+        </section>
+
+        <section class="content" id="announcementsPanel">
+            <div class="panel-scroll">
+                <div class="page-heading">
+                    <h2>📢 Matangazo</h2>
+                    <p>Habari na taarifa muhimu za jamii yako.</p>
+                </div>
+
+                <button class="primary-button" id="newAnnouncement">
+                    ＋ Tangazo jipya
+                </button>
+
+                <div id="announcementList" style="margin-top:20px">
+                    <div class="card">
+                        <h3>Karibu VibeChat</h3>
+                        <p>Hapa ndipo matangazo muhimu yataonekana.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content" id="locationsPanel">
+            <div class="panel-scroll">
+                <div class="page-heading">
+                    <h2>📍 GPS Locations</h2>
+                    <p>Pata eneo lako na ushiriki coordinates zako.</p>
+                </div>
+
+                <div class="card">
+                    <h3>📡 Eneo langu la sasa</h3>
+                    <p>Ruhusu kivinjari kutumia GPS ili kupata eneo lako.</p>
+
+                    <div class="coordinates" id="coordinates">
+                        Latitude: —<br>Longitude: —
+                    </div>
+
+                    <button class="primary-button" id="getLocation">
+                        Pata eneo langu
+                    </button>
+
+                    <button class="secondary-button" id="shareLocation" disabled>
+                        Shiriki kwenye chat
+                    </button>
+
+                    <p id="gpsStatus" style="margin-top:12px">
+                        GPS haijaanzishwa.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>🗺️ Fungua eneo kwenye ramani</h3>
+
+                    <label for="latitude">Latitude</label>
+                    <input class="field" id="latitude" type="number"
+                        step="any" placeholder="-6.7924">
+
+                    <label for="longitude">Longitude</label>
+                    <input class="field" id="longitude" type="number"
+                        step="any" placeholder="39.2083">
+
+                    <button class="primary-button" id="openMap">
+                        Fungua Google Maps ↗
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const socket = typeof io === "function" ? io() : null;
+
+let username = localStorage.getItem("vibe_username") || "Mgeni";
+let currentLocation = null;
+let messages = [];
+let announcements = [];
+const seenIds = new Set();
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(text) {
+    return String(text).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+function showToast(text) {
+    $("toast").textContent = text;
+    $("toast").classList.add("show");
+    setTimeout(() => $("toast").classList.remove("show"), 2500);
+}
+
+function updateProfile() {
+    $("profileName").textContent = username;
+    $("profileAvatar").textContent = username.charAt(0).toUpperCase();
+}
+
+function formatTime(value) {
+    const date = value ? new Date(value) : new Date();
+    return isNaN(date.getTime()) ? "" :
+        date.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+}
+
+function renderMessages() {
+    const area = $("messages");
+    area.innerHTML = "";
+
+    if (!messages.length) {
+        area.innerHTML = `
+            <div class="welcome">
+                <div class="emoji">💬</div>
+                <h3>Karibu VibeChat!</h3>
+                <p>Andika ujumbe wako kuanza mazungumzo.</p>
+            </div>`;
+        return;
+    }
+
+    messages.forEach(message => {
+        const mine = message.username === username;
+        const row = document.createElement("div");
+        row.className = "message" + (mine ? " mine" : "");
+
+        row.innerHTML = `
+            ${mine ? "" : `<div class="message-avatar">${escapeHTML((message.username || "M")[0].toUpperCase())}</div>`}
+            <div class="message-body">
+                ${mine ? "" : `<div class="sender">${escapeHTML(message.username || "Mgeni")}</div>`}
+                <div class="bubble">${escapeHTML(message.message)}</div>
+                <div class="message-time">${escapeHTML(formatTime(message.created_at))}</div>
+            </div>
+            ${mine ? `<div class="message-avatar">${escapeHTML(username[0].toUpperCase())}</div>` : ""}
+        `;
+
+        area.appendChild(row);
+    });
+
+    area.scrollTop = area.scrollHeight;
+}
+
+function addMessage(message) {
+    if (!message || !message.message) return;
+
+    if (message.id && seenIds.has(String(message.id))) return;
+    if (message.id) seenIds.add(String(message.id));
+
+    messages.push(message);
+    if (messages.length > 300) messages.shift();
+
+    if (!socket) {
+        localStorage.setItem("vibe_messages", JSON.stringify(messages));
+    }
+
+    renderMessages();
+}
+
+$("messageForm").addEventListener("submit", event => {
+    event.preventDefault();
+
+    const input = $("messageInput");
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    const message = {
+        username,
+        message: text,
+        created_at: new Date().toISOString()
+    };
+
+    input.value = "";
+    input.style.height = "auto";
+
+    if (socket) {
+        socket.emit("chat_message", message);
+    } else {
+        addMessage(message);
+    }
+});
+
+$("messageInput").addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        $("messageForm").requestSubmit();
+    }
+});
+
+$("messageInput").addEventListener("input", event => {
+    event.target.style.height = "auto";
+    event.target.style.height =
+        Math.min(event.target.scrollHeight, 120) + "px";
+});
+
+document.querySelectorAll("[data-emoji]").forEach(button => {
+    button.addEventListener("click", () => {
+        $("messageInput").value += button.dataset.emoji;
+        $("messageInput").focus();
+    });
+});
+
+$("changeName").addEventListener("click", () => {
+    const name = prompt("Andika jina lako:", username);
+
+    if (name && name.trim()) {
+        username = name.trim().slice(0, 40);
+        localStorage.setItem("vibe_username", username);
+        updateProfile();
+        renderMessages();
+    }
+});
+
+document.querySelectorAll("[data-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+        document.querySelectorAll("[data-tab]").forEach(item =>
+            item.classList.toggle("active", item === button)
+        );
+
+        document.querySelectorAll(".content").forEach(panel =>
+            panel.classList.remove("active")
+        );
+
+        const tab = button.dataset.tab;
+        $(tab + "Panel").classList.add("active");
+
+        const titles = {
+            chat: ["💬", "Group Chat", "Sehemu ya mazungumzo ya jamii"],
+            announcements: ["📢", "Matangazo", "Habari na taarifa muhimu"],
+            locations: ["📍", "GPS Locations", "Shiriki eneo lako"]
         };
 
-        function loginApp() {
-            let u = document.getElementById('username').value;
-            let p = document.getElementById('password').value;
-            
-            fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
-            })
-            .then(res => res.json())
+        $("roomIcon").textContent = titles[tab][0];
+        $("roomTitle").textContent = titles[tab][1];
+        $("roomSubtitle").textContent = titles[tab][2];
+    });
+});
+
+$("newAnnouncement").addEventListener("click", () => {
+    const title = prompt("Kichwa cha tangazo:");
+    if (!title || !title.trim()) return;
+
+    const content = prompt("Andika maelezo ya tangazo:");
+    if (!content || !content.trim()) return;
+
+    const announcement = {
+        title: title.trim(),
+        content: content.trim(),
+        created_at: new Date().toLocaleString()
+    };
+
+    if (socket) {
+        socket.emit("publish_announcement", announcement);
+    } else {
+        announcements.push(announcement);
+        localStorage.setItem("vibe_announcements", JSON.stringify(announcements));
+        renderAnnouncements();
+    }
+});
+
+function renderAnnouncements() {
+    const list = $("announcementList");
+
+    if (!announcements.length) {
+        list.innerHTML = `<div class="card"><h3>Hakuna matangazo bado</h3>
+        <p>Matangazo mapya yataonekana hapa.</p></div>`;
+        return;
+    }
+
+    list.innerHTML = announcements.map(item => `
+        <article class="announcement">
+            <h3>📢 ${escapeHTML(item.title)}</h3>
+            <p>${escapeHTML(item.content)}</p>
+            <small style="color:#94a3b8">${escapeHTML(item.created_at || "")}</small>
+        </article>
+    `).join("");
+}
+
+$("getLocation").addEventListener("click", () => {
+    if (!navigator.geolocation) {
+        $("gpsStatus").textContent = "Kivinjari hiki hakitumii GPS.";
+        return;
+    }
+
+    $("gpsStatus").textContent = "Inatafuta eneo lako...";
+
+    navigator.geolocation.getCurrentPosition(position => {
+        currentLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+        };
+
+        $("coordinates").innerHTML =
+            `Latitude: ${currentLocation.lat.toFixed(6)}<br>` +
+            `Longitude: ${currentLocation.lng.toFixed(6)}`;
+
+        $("latitude").value = currentLocation.lat;
+        $("longitude").value = currentLocation.lng;
+        $("gpsStatus").textContent = "Eneo limepatikana.";
+        $("shareLocation").disabled = false;
+    }, error => {
+        $("gpsStatus").textContent =
+            "Imeshindikana kupata eneo. Ruhusu GPS na ujaribu tena.";
+    }, {
+        enableHighAccuracy: true,
+        timeout: 15000
+    });
+});
+
+$("openMap").addEventListener("click", () => {
+    const lat = Number($("latitude").value);
+    const lng = Number($("longitude").value);
+
+    if ($("latitude").value === "" || $("longitude").value === "" ||
+        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        showToast("Ingiza coordinates sahihi kwanza.");
+        return;
+    }
+
+    window.open(
+        `https://www.google.com/maps?q=${lat},${lng}`,
+        "_blank",
+        "noopener"
+    );
+});
+
+$("shareLocation").addEventListener("click", () => {
+    if (!currentLocation) return;
+
+    const message = {
+        username,
+        message: `📍 Eneo langu: ${currentLocation.lat}, ${currentLocation.lng}\nhttps://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`,
+        created_at: new Date().toISOString()
+    };
+
+    if (socket) socket.emit("chat_message", message);
+    else addMessage(message);
+
+    document.querySelector('[data-tab="chat"]').click();
+});
+
+if (socket) {
+    socket.on("new_message", addMessage);
+
+    socket.on("new_announcement", announcement => {
+        announcements.push(announcement);
+        renderAnnouncements();
+    });
+}
+
+function loadSavedData() {
+    if (!socket) {
+        try {
+            messages = JSON.parse(localStorage.getItem("vibe_messages") || "[]");
+            announcements = JSON.parse(localStorage.getItem("vibe_announcements") || "[]");
+        } catch (error) {
+            messages = [];
+            announcements = [];
+        }
+
+        renderMessages();
+        renderAnnouncements();
+    } else {
+        fetch("/api/messages")
+            .then(response => response.ok ? response.json() : [])
             .then(data => {
-                if(data.ok) {
-                    currentUser = data.username;
-                    showAppUI();
-                } else {
-                    alert(data.error || 'Imeshindikana kuingia');
-                }
-            });
-        }
-
-        function showAppUI() {
-            document.getElementById('section-login').classList.add('hidden');
-            document.getElementById('section-app').classList.remove('hidden');
-            document.getElementById('user-display').innerText = currentUser;
-            
-            initGPS();
-
-            socket = io();
-            socket.emit('join');
-
-            socket.on('group_message', msg => appendMessage(msg));
-            socket.on('announce', () => loadAnnouncements());
-
-            loadChatHistory();
-            loadAnnouncements();
-            loadGPSLocations();
-        }
-
-        function initGPS() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    let lat = position.coords.latitude;
-                    let lon = position.coords.longitude;
-                    document.getElementById('gps-status').innerText = `Eneo Lako: Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`;
-
-                    fetch('/api/save-location', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ latitude: lat, longitude: lon })
-                    }).then(() => loadGPSLocations());
-                }, err => {
-                    document.getElementById('gps-status').innerText = "Tafadhali washa GPS kwenye simu ili kusajili eneo lako.";
-                });
-            }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-chat').classList.add('hidden');
-            document.getElementById('tab-announcements').classList.add('hidden');
-            document.getElementById('tab-gps').classList.add('hidden');
-
-            if(tab === 'chat') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('tab-chat').classList.remove('hidden');
-            } else if(tab === 'announcements') {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('tab-announcements').classList.remove('hidden');
-            } else if(tab === 'gps') {
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
-                document.getElementById('tab-gps').classList.remove('hidden');
-                loadGPSLocations();
-            }
-        }
-
-        function loadChatHistory() {
-            fetch('/api/history').then(res => res.json()).then(data => {
-                let box = document.getElementById('chat-messages');
-                box.innerHTML = '';
-                (data.messages || []).forEach(m => appendMessage(m));
-            });
-        }
-
-        function appendMessage(msg) {
-            let box = document.getElementById('chat-messages');
-            let div = document.createElement('div');
-            let isMine = msg.username === currentUser;
-            div.className = 'msg-box' + (isMine ? ' my-msg' : '');
-            div.innerHTML = `<span class="msg-sender">${msg.username}</span> ${msg.text || ''} <span class="msg-time">${msg.time}</span>`;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function sendGroupMessage() {
-            let input = document.getElementById('chat-input');
-            let text = input.value.trim();
-            if(!text) return;
-
-            if(socket) socket.emit('group_message', { text: text });
-            else {
-                fetch('/api/messages', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ text: text })
-                });
-            }
-            input.value = '';
-        }
-
-        function sendSticker(stickerEmoji) {
-            if(socket) socket.emit('group_message', { text: stickerEmoji });
-        }
-
-        function createAnnouncement() {
-            let title = document.getElementById('ann-title').value;
-            let text = document.getElementById('ann-text').value;
-            let link = document.getElementById('ann-link').value;
-
-            fetch('/api/announcements', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ title, text, link })
-            }).then(res => res.json()).then(data => {
-                if(data.ok) {
-                    document.getElementById('ann-title').value = '';
-                    document.getElementById('ann-text').value = '';
-                    document.getElementById('ann-link').value = '';
-                    loadAnnouncements();
-                } else alert(data.error);
-            });
-        }
-
-        function loadAnnouncements() {
-            fetch('/api/announcements').then(res => res.json()).then(data => {
-                let list = document.getElementById('announcements-list');
-                list.innerHTML = '';
-                (data.items || []).forEach(item => {
-                    let d = document.createElement('div');
-                    d.className = 'ann-card';
-                    d.innerHTML = `
-                        <h4>${item.title || 'Tangazo'}</h4>
-                        <p>${item.text || ''}</p>
-                        ${item.link ? `<a href="${item.link}" target="_blank" style="color:var(--primary); font-size:14px; font-weight:bold; display:inline-block; margin-top:6px;">Fungua Link ya Kazi</a>` : ''}
-                        <div style="font-size:11px; color:#666; margin-top:6px;">Imetumwa na: <b>${item.username}</b> - ${item.timestr}</div>
-                    `;
-                    list.appendChild(d);
-                });
-            });
-        }
-
-        function loadGPSLocations() {
-            fetch('/api/owner/locations').then(res => res.json()).then(data => {
-                let list = document.getElementById('gps-locations-list');
-                if (!list) return;
-                list.innerHTML = '';
-                if (data.ok && data.locations) {
-                    data.locations.forEach(loc => {
-                        let div = document.createElement('div');
-                        div.className = 'gps-card';
-                        div.innerHTML = `
-                            <h4>Mwanachama: ${loc.username}</h4>
-                            <p><b>Latitude:</b> ${loc.latitude} | <b>Longitude:</b> ${loc.longitude}</p>
-                            <p style="margin-top:5px;"><a href="https://maps.google.com/?q=${loc.latitude},${loc.longitude}" target="_blank" style="color:var(--primary); font-weight:bold; font-size:14px;">Fungua kwenye Google Maps 📍</a></p>
-                            <div style="font-size:11px; color:#666; margin-top:4px;">Mara ya mwisho: ${loc.updated_at}</div>
-                        `;
-                        list.appendChild(div);
+                if (Array.isArray(data) && data.length) {
+                    messages = data;
+                    data.forEach(message => {
+                        if (message.id) seenIds.add(String(message.id));
                     });
+                    renderMessages();
                 }
-            });
-        }
-    </script>
+            })
+            .catch(() => {});
+
+        fetch("/api/announcements")
+            .then(response => response.ok ? response.json() : [])
+            .then(data => {
+                if (Array.isArray(data)) {
+                    announcements = data;
+                    renderAnnouncements();
+                }
+            })
+            .catch(() => {});
+    }
+}
+
+updateProfile();
+loadSavedData();
+</script>
 </body>
 </html>
