@@ -1,21 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="sw">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WESTVISION ARTS</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #4a0e4e; text-align: center; }
+        p { text-align: center; color: #666; }
+        .box { margin-top: 20px; padding: 15px; background: #fafafa; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
 </head>
 <body>
-    <h1>Karibu WESTVISION ARTS</h1>
-    <p>Mfumo upo hewani na unafanya kazi vizuri!</p>
+    <div class="container">
+        <h1>WESTVISION ARTS</h1>
+        <p>{{ tagline }}</p>
+        
+        <div class="box">
+            <h3>Karibu kwenye Mfumo</h3>
+            <p>App yako ipo hewani na inafanya kazi kikamilifu na ufuatiliaji wa GPS!</p>
+        </div>
+    </div>
 
-    <!-- Msimbo wa GPS kwa ajili ya kumjua mtumiaji alipo -->
+    <!-- Msimbo wa GPS kwa ajili ya kufuatilia eneo la mwanachama -->
     <script>
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             let lat = position.coords.latitude;
             let lon = position.coords.longitude;
             
-            // Inatuma taarifa za eneo moja kwa moja kwenye app yako ya Flask
-            fetch('/save-location', {
+            // Inatuma eneo moja kwa moja kwenye backend ya Flask kimya kimya
+            fetch('/api/save-location', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ latitude: lat, longitude: lon })
