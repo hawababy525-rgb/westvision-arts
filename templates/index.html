@@ -6,253 +6,432 @@
     <title>WESTVISION ARTS</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
-        :root { --primary: #4a0e4e; --accent: #d4af37; --bg: #f4f4f9; }
+        :root {
+            --bg-obsidian: #08070b;
+            --panel-bg: rgba(18, 16, 26, 0.85);
+            --neon-gold: #f3e5ab;
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff007f;
+            --neon-purple: #9d00ff;
+            --text-main: #e2e8f0;
+        }
+
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #333; }
-        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; }
-        header h1 { margin: 0; font-size: 20px; color: var(--accent); }
-        header p { margin: 3px 0 0; font-size: 11px; opacity: 0.8; }
-        
-        .nav-tabs { display: flex; background: #350938; border-bottom: 2px solid var(--accent); }
-        .tab-btn { flex: 1; padding: 12px; color: white; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; }
-        .tab-btn.active { background: var(--accent); color: #000; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-obsidian);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        .content { padding: 15px; flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .card { background: #fafafa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        
-        /* Chat UI */
-        #chat-messages { flex: 1; min-height: 300px; max-height: 450px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 6px; background: #fff; margin-bottom: 10px; }
-        .message-item { margin-bottom: 10px; padding: 8px 12px; border-radius: 6px; background: #eef2f5; font-size: 14px; }
-        .message-item strong { color: var(--primary); display: block; font-size: 12px; margin-bottom: 2px; }
-        .message-item img { max-width: 100%; border-radius: 6px; margin-top: 5px; }
-        .message-time { font-size: 10px; color: #888; float: right; margin-top: 4px; }
+        /* Animated Canvas Background */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+        }
 
-        /* Announcement UI */
-        .announcement-item { border-left: 4px solid var(--accent); background: #fff; padding: 12px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .announcement-item h4 { margin: 0 0 5px 0; color: var(--primary); }
-        .announcement-item img { max-width: 100%; border-radius: 4px; margin-top: 5px; }
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(157, 0, 255, 0.2);
+        }
 
-        input, button, textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        button:hover { background: #350938; }
+        header {
+            background: linear-gradient(135deg, #1a0b2e, #0f051d);
+            padding: 18px;
+            text-align: center;
+            border-bottom: 2px solid var(--neon-magenta);
+            position: relative;
+        }
+
+        /* Glowing text color changing */
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: colorGlow 6s ease infinite;
+        }
+
+        @keyframes colorGlow {
+            0% { filter: drop-shadow(0 0 2px var(--neon-cyan)); }
+            50% { filter: drop-shadow(0 0 8px var(--neon-magenta)); }
+            100% { filter: drop-shadow(0 0 2px var(--neon-cyan)); }
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 11px;
+            color: #a0aec0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(10, 5, 20, 0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            color: #a0aec0;
+            background: none;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.08);
+            border-bottom: 3px solid var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+        }
+
+        .content {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+        }
+
+        .cyber-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, var(--neon-magenta), var(--neon-purple));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+            transition: transform 0.1s, box-shadow 0.3s;
+        }
+
+        .cyber-btn:active { transform: scale(0.98); }
+        .cyber-btn:hover { box-shadow: 0 0 25px rgba(255, 0, 127, 0.8); }
+
+        /* Chat Room Styling */
+        #chat-messages {
+            flex: 1;
+            min-height: 320px;
+            max-height: 420px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .msg-bubble {
+            background: rgba(255,255,255,0.06);
+            border-left: 3px solid var(--neon-cyan);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .msg-bubble strong {
+            color: var(--neon-cyan);
+            display: block;
+            font-size: 11px;
+            margin-bottom: 3px;
+        }
+
+        .msg-time {
+            font-size: 9px;
+            color: #718096;
+            float: right;
+        }
+
+        /* Announcements Feed */
+        .ann-card {
+            background: rgba(20, 10, 35, 0.7);
+            border: 1px solid var(--neon-gold);
+            border-left: 4px solid var(--neon-gold);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .ann-card h4 { margin: 0 0 5px; color: var(--neon-gold); font-size: 15px; }
+        .ann-card p { margin: 0; font-size: 13px; color: #cbd5e0; }
         
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <!-- Live Particle Background -->
+    <canvas id="bg-canvas"></canvas>
+
     <div class="app-container">
         <header>
             <h1>WESTVISION ARTS</h1>
-            <p>Sanaa na Ubunifu Tanganyika Magharibi</p>
+            <p>Tanzania Cyber Studio & Live Media</p>
         </header>
-        
-        <!-- SEHEMU YA LOGIN -->
-        <div id="section-login" class="content">
-            <div class="card">
-                <h3 style="margin-top:0; color: var(--primary);">Ingia kwenye App</h3>
-                <input type="text" id="username" placeholder="Jina la mtumiaji (mf. Tanganyika)" value="tanganyika">
-                <input type="password" id="password" placeholder="PIN au Password" value="11223344">
-                <button onclick="loginApp()">INGIA SASA</button>
+
+        <!-- LOGIN SCREEN -->
+        <div id="section-login" class="content" style="justify-content: center;">
+            <div class="glass-card">
+                <h3 style="margin-top:0; color: var(--neon-cyan); text-align: center;">MFUMO WA KISASA</h3>
+                <input type="text" id="username" placeholder="Jina la Mtumiaji" value="tanganyika">
+                <input type="password" id="password" placeholder="PIN ya Kuingia" value="11223344">
+                <button class="cyber-btn" onclick="loginApp()">ANZA KUTUMIA APP</button>
             </div>
         </div>
 
-        <!-- SEHEMU YA NDANI YA APP (MAIN DASHBOARD) -->
+        <!-- MAIN DASHBOARD -->
         <div id="section-app" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
             <div class="nav-tabs">
-                <button class="tab-btn active" onclick="switchTab('chat')">Group Chat</button>
+                <button class="tab-btn active" onclick="switchTab('chat')">Live Chat</button>
                 <button class="tab-btn" onclick="switchTab('announcements')">Matangazo</button>
             </div>
 
-            <!-- TAB 1: GROUP CHAT -->
+            <!-- CHAT TAB -->
             <div id="tab-chat" class="content">
                 <div id="chat-messages"></div>
-                <div style="display: flex; gap: 5px;">
-                    <input type="text" id="chat-input" placeholder="Andika ujumbe hapa..." onkeypress="if(event.key==='Enter') sendGroupMessage()">
-                    <button onclick="sendGroupMessage()" style="width: 80px;">Tuma</button>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="chat-input" placeholder="Andika ujumbe wa kisasa..." onkeypress="if(event.key==='Enter') sendGroupMessage()" style="margin:0;">
+                    <button class="cyber-btn" onclick="sendGroupMessage()" style="width: 70px; margin:0; padding:0;">Tuma</button>
                 </div>
             </div>
 
-            <!-- TAB 2: MATANGAZO -->
+            <!-- ANNOUNCEMENTS TAB -->
             <div id="tab-announcements" class="content hidden">
-                <div class="card">
-                    <h4 style="margin: 0 0 10px 0;">Weka Tangazo Jipya</h4>
+                <div class="glass-card">
+                    <h4 style="margin:0 0 10px; color: var(--neon-gold);">Weka Tangazo Jipya</h4>
                     <input type="text" id="ann-title" placeholder="Kichwa cha Tangazo">
-                    <textarea id="ann-text" placeholder="Maelezo ya Tangazo..." rows="2"></textarea>
-                    <input type="text" id="ann-link" placeholder="Link (mf. https://...) - Siyo lazima">
-                    <button onclick="createAnnouncement()">Chapisha Tangazo</button>
+                    <textarea id="ann-text" placeholder="Andika maelezo ya tangazo..." rows="2"></textarea>
+                    <input type="text" id="ann-link" placeholder="Link ya kazi (https://...)">
+                    <button class="cyber-btn" onclick="createAnnouncement()">Chapisha Tangazo</button>
                 </div>
-                <h3 style="font-size: 16px; color: var(--primary);">Matangazo ya Hivi Karibuni</h3>
                 <div id="announcements-list"></div>
             </div>
         </div>
     </div>
 
     <script>
-    let socket = null;
+        // Futuristic Animated Background Canvas
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
 
-    // Check auth status on load
-    window.onload = function() {
-        fetch('/api/me')
-        .then(res => res.json())
-        .then(data => {
-            if (data.auth) {
-                showAppUI();
-            }
-        });
-    };
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resizeCanvas;
+        resizeCanvas();
 
-    function loginApp() {
-        let u = document.getElementById('username').value;
-        let p = document.getElementById('password').value;
-        
-        fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: u, password: p })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.ok) {
-                showAppUI();
-            } else {
-                alert(data.error || 'Imeshindikana kuingia');
-            }
-        });
-    }
+        for(let i=0; i<40; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5,
+                speedY: (Math.random() - 0.5) * 0.5,
+                speedX: (Math.random() - 0.5) * 0.5
+            });
+        }
 
-    function showAppUI() {
-        document.getElementById('section-login').classList.add('hidden');
-        document.getElementById('section-app').classList.remove('hidden');
-        
-        // Geolocation setup
-        initGPS();
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if(p.x < 0) p.x = canvas.width;
+                if(p.x > canvas.width) p.x = 0;
+                if(p.y < 0) p.y = canvas.height;
+                if(p.y > canvas.height) p.y = 0;
 
-        // Connect Socket.IO
-        socket = io();
-        socket.emit('join');
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
 
-        socket.on('group_message', function(msg) {
-            appendMessage(msg);
-        });
+        let socket = null;
 
-        socket.on('announce', function(ann) {
+        window.onload = function() {
+            fetch('/api/me').then(res => res.json()).then(data => {
+                if (data.auth) showAppUI();
+            });
+        };
+
+        function loginApp() {
+            let u = document.getElementById('username').value;
+            let p = document.getElementById('password').value;
+            
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.ok) showAppUI();
+                else alert(data.error || 'Imeshindikana kuingia');
+            });
+        }
+
+        function showAppUI() {
+            document.getElementById('section-login').classList.add('hidden');
+            document.getElementById('section-app').classList.remove('hidden');
+            
+            initGPS();
+            socket = io();
+            socket.emit('join');
+
+            socket.on('group_message', msg => appendMessage(msg));
+            socket.on('announce', () => loadAnnouncements());
+
+            loadChatHistory();
             loadAnnouncements();
-        });
+        }
 
-        // Load History & Announcements
-        loadChatHistory();
-        loadAnnouncements();
-    }
+        function initGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    fetch('/api/save-location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        })
+                    });
+                });
+            }
+        }
 
-    function initGPS() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                fetch('/api/save-location', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    })
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-chat').classList.add('hidden');
+            document.getElementById('tab-announcements').classList.add('hidden');
+
+            if(tab === 'chat') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-chat').classList.remove('hidden');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-announcements').classList.remove('hidden');
+            }
+        }
+
+        function loadChatHistory() {
+            fetch('/api/history').then(res => res.json()).then(data => {
+                let box = document.getElementById('chat-messages');
+                box.innerHTML = '';
+                (data.messages || []).forEach(m => appendMessage(m));
+            });
+        }
+
+        function appendMessage(msg) {
+            let box = document.getElementById('chat-messages');
+            let div = document.createElement('div');
+            div.className = 'msg-bubble';
+            div.innerHTML = `<strong>${msg.username}</strong> ${msg.text || ''} <span class="msg-time">${msg.time}</span>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendGroupMessage() {
+            let input = document.getElementById('chat-input');
+            let text = input.value.trim();
+            if(!text) return;
+
+            if(socket) socket.emit('group_message', { text: text });
+            input.value = '';
+        }
+
+        function createAnnouncement() {
+            let title = document.getElementById('ann-title').value;
+            let text = document.getElementById('ann-text').value;
+            let link = document.getElementById('ann-link').value;
+
+            fetch('/api/announcements', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ title, text, link })
+            }).then(res => res.json()).then(data => {
+                if(data.ok) {
+                    document.getElementById('ann-title').value = '';
+                    document.getElementById('ann-text').value = '';
+                    document.getElementById('ann-link').value = '';
+                    loadAnnouncements();
+                } else alert(data.error);
+            });
+        }
+
+        function loadAnnouncements() {
+            fetch('/api/announcements').then(res => res.json()).then(data => {
+                let list = document.getElementById('announcements-list');
+                list.innerHTML = '';
+                (data.items || []).forEach(item => {
+                    let d = document.createElement('div');
+                    d.className = 'ann-card';
+                    d.innerHTML = `
+                        <h4>${item.title || 'Tangazo'}</h4>
+                        <p>${item.text || ''}</p>
+                        ${item.link ? `<a href="${item.link}" target="_blank" style="color:var(--neon-cyan); font-size:12px; display:inline-block; margin-top:5px;">Fungua Link ya Kazi</a>` : ''}
+                        <div style="font-size:9px; color:#a0aec0; margin-top:6px;">Imetumwa na: ${item.username} - ${item.timestr}</div>
+                    `;
+                    list.appendChild(d);
                 });
             });
         }
-    }
-
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('tab-chat').classList.add('hidden');
-        document.getElementById('tab-announcements').classList.add('hidden');
-
-        if(tabName === 'chat') {
-            document.querySelectorAll('.tab-btn')[0].classList.add('active');
-            document.getElementById('tab-chat').classList.remove('hidden');
-        } else {
-            document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            document.getElementById('tab-announcements').classList.remove('hidden');
-        }
-    }
-
-    function loadChatHistory() {
-        fetch('/api/history')
-        .then(res => res.json())
-        .then(data => {
-            let container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            (data.messages || []).forEach(msg => appendMessage(msg));
-            container.scrollTop = container.scrollHeight;
-        });
-    }
-
-    function appendMessage(msg) {
-        let container = document.getElementById('chat-messages');
-        let div = document.createElement('div');
-        div.className = 'message-item';
-        div.innerHTML = `<strong>${msg.username}</strong> ${msg.text || ''} <span class="message-time">${msg.time}</span>`;
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function sendGroupMessage() {
-        let input = document.getElementById('chat-input');
-        let text = input.value.trim();
-        if(!text) return;
-
-        if(socket) {
-            socket.emit('group_message', { text: text });
-        } else {
-            fetch('/api/messages', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ text: text })
-            });
-        }
-        input.value = '';
-    }
-
-    function createAnnouncement() {
-        let title = document.getElementById('ann-title').value;
-        let text = document.getElementById('ann-text').value;
-        let link = document.getElementById('ann-link').value;
-
-        fetch('/api/announcements', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ title: title, text: text, link: link })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.ok) {
-                document.getElementById('ann-title').value = '';
-                document.getElementById('ann-text').value = '';
-                document.getElementById('ann-link').value = '';
-                loadAnnouncements();
-            } else {
-                alert(data.error);
-            }
-        });
-    }
-
-    function loadAnnouncements() {
-        fetch('/api/announcements')
-        .then(res => res.json())
-        .then(data => {
-            let container = document.getElementById('announcements-list');
-            container.innerHTML = '';
-            (data.items || []).forEach(item => {
-                let div = document.createElement('div');
-                div.className = 'announcement-item';
-                div.innerHTML = `
-                    <h4>${item.title || 'Tangazo'}</h4>
-                    <p style="margin:0; font-size: 13px;">${item.text || ''}</p>
-                    ${item.link ? `<a href="${item.link}" target="_blank" style="font-size: 12px; color: var(--primary);">Fungua Link</a>` : ''}
-                    <div style="font-size: 10px; color:#888; margin-top:5px;">Iliwekwa na: ${item.username} - ${item.timestr}</div>
-                `;
-                container.appendChild(div);
-            });
-        });
-    }
     </script>
 </body>
 </html>
