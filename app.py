@@ -9,13 +9,8 @@ Vipengele:
   - Private chat kwa Owner tu (inafunguliwa kwa password 'moud1234')
   - Kutuma picha, link, video fupi (<=8s), na record ya sauti
   - Sehemu ya matangazo ya kazi (picha + link) inayoonekana kwa wote
+  - GPS Geolocation Tracking kwa ajili ya Owner kufuatilia wanachama
   - PWA: inaweza kusakinishwa kwenye simu na kompyuta kama app
-
-Usalama (SOMA HAPA):
-  - Kwa chaguo-msingi inafunga 127.0.0.1 tu.
-  - Password zimewekwa kama environment variables; badilisha kabla ya matumizi.
-  - Hii ni toleo rahisi (password hazijafichwa kwa hash) - kwa matumizi
-    ya hadharani ongeza HTTPS, hashing ya password, na rate-limiting.
 """
 import os
 import sqlite3
@@ -29,7 +24,6 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-# Production hosting: point WV_DATA_DIR at persistent storage so messages/uploads survive redeploys.
 DATA_DIR = os.environ.get("WV_DATA_DIR", BASE)
 os.makedirs(DATA_DIR, exist_ok=True)
 UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
@@ -50,7 +44,7 @@ TAGLINE = ("WESTVISION ARTS ni kikundi cha wasanii mahiri kutoka Tanganyika "
 
 ALLOWED_EXT = {"png", "jpg", "jpeg", "gif", "webp",
                "mp4", "webm", "mov",
-               "webm", "ogg", "mp3", "wav", "m4a"}
+               "ogg", "mp3", "wav", "m4a"}
 MAX_UPLOAD = 25 * 1024 * 1024  # 25 MB
 
 app = Flask(__name__)
@@ -85,6 +79,9 @@ def init_db():
         CREATE TABLE IF NOT EXISTS announcements(
             id TEXT PRIMARY KEY, username TEXT, title TEXT, text TEXT,
             image_url TEXT, link TEXT, created REAL);
+        CREATE TABLE IF NOT EXISTS user_locations(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT,
+            latitude TEXT, longitude TEXT, updated REAL);
         """)
 
 
@@ -146,8 +143,6 @@ def api_register():
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data = request.get_json(force=True)
-    # Rahisisha kuingia kwa akaunti ya pamoja ya kikundi.
-    # Taarifa hizi zinaweza kubadilishwa kupitia environment variables.
     login_name = (data.get("username") or data.get("email") or "").strip().lower()[:254]
     password = str(data.get("password") or "")
     if login_name == QUICK_LOGIN_NAME and password == QUICK_LOGIN_PIN:
@@ -157,7 +152,6 @@ def api_login():
         session["user_id"] = None
         return jsonify(ok=True, username="Tanganyika")
 
-    # Endelea kuruhusu akaunti za zamani zilizosajiliwa kwa email.
     email = login_name
     with db() as c:
         user = c.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
@@ -190,6 +184,46 @@ def api_me():
                    username=session.get("username", ""))
 
 
+# ---- GPS Location Tracking Endpoints ----
+@app.route("/api/save-location", methods=["POST"])
+def api_save_location():
+    if not logged_in():
+        return jsonify(ok=False), 401
+    data = request.get_json(silent=True) or {}
+    lat = str(data.get("latitude") or "")
+    lon = str(data.get("longitude") or "")
+    if not lat or not lon:
+        return jsonify(ok=False, error="Eneo halijapatikana"), 400
+    username = session.get("username", "Mwanachama")
+    ts = now()
+    with db() as c:
+        existing = c.execute("SELECT 1 FROM user_locations WHERE username=?", (username,)).fetchone()
+        if existing:
+            c.execute("UPDATE user_locations SET latitude=?, longitude=?, updated=? WHERE username=?",
+                      (lat, lon, ts, username))
+        else:
+            c.execute("INSERT INTO user_locations(username, latitude, longitude, updated) VALUES(?,?,?,?)",
+                      (username, lat, lon, ts))
+    return jsonify(ok=True)
+
+
+@app.route("/api/owner/locations")
+def api_owner_locations():
+    if not is_owner():
+        return jsonify(ok=False, error="Ruhusa imekataliwa"), 403
+    with db() as c:
+        rows = c.execute("SELECT username, latitude, longitude, updated FROM user_locations ORDER BY updated DESC").fetchall()
+    locations = [
+        {
+            "username": r["username"],
+            "latitude": r["latitude"],
+            "longitude": r["longitude"],
+            "time": hhmm(r["updated"])
+        } for r in rows
+    ]
+    return jsonify(ok=True, locations=locations)
+
+
 def _save_upload(file):
     ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
     if ext not in ALLOWED_EXT:
@@ -219,7 +253,6 @@ def serve_upload(fname):
 
 @app.route("/api/messages", methods=["POST"])
 def api_send_message():
-    """HTTP fallback for networks where Socket.IO/CDN is unavailable."""
     require_login()
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()[:2000]
@@ -235,6 +268,7 @@ def api_send_message():
     payload = {"id": mid, "username": username, "text": text,
                "media_url": media_url, "media_type": media_type, "time": hhmm(ts)}
     return jsonify(ok=True, message=payload)
+
 
 @app.route("/api/history")
 def api_history():
@@ -265,6 +299,7 @@ def api_create_announcement():
     payload = {"id": aid, "username": username, "title": title, "text": text,
                "image_url": image_url, "link": link, "timestr": hhmm(ts)}
     return jsonify(ok=True, item=payload)
+
 
 @app.route("/api/announcements")
 def api_announcements():
@@ -300,9 +335,9 @@ def api_send_private():
                "text": text, "media_url": media_url, "media_type": media_type, "time": hhmm(ts)}
     return jsonify(ok=True, message=payload)
 
+
 @app.route("/api/private")
 def api_private():
-    """Member: anaona thread yake tu. Owner (aliyefungua): anaona zote."""
     require_login()
     with db() as c:
         if is_owner():
@@ -376,7 +411,6 @@ def on_group_message(data):
 
 @socketio.on("private_send")
 def on_private_send(data):
-    """Member anatuma kwa owner, AU owner anajibu member fulani."""
     if not logged_in():
         return
     me = session.get("username")
