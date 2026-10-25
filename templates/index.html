@@ -5,37 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WESTVISION ARTS</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #4a0e4e; text-align: center; }
-        p { text-align: center; color: #666; }
-        .box { margin-top: 20px; padding: 15px; background: #fafafa; border: 1px solid #ddd; border-radius: 5px; }
+        :root { --primary: #4a0e4e; --accent: #d4af37; --bg: #f4f4f9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #333; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; }
+        header h1 { margin: 0; font-size: 20px; color: var(--accent); }
+        header p { margin: 5px 0 0; font-size: 12px; opacity: 0.8; }
+        .content { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .card { background: #fafafa; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; }
+        h2 { color: var(--primary); font-size: 18px; margin-top: 0; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #350938; }
+        .tagline { font-size: 13px; color: #666; text-align: center; margin-bottom: 20px; line-height: 1.4; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>WESTVISION ARTS</h1>
-        <p>{{ tagline }}</p>
+    <div class="app-container">
+        <header>
+            <h1>WESTVISION ARTS</h1>
+            <p>Sanaa na Ubunifu Tanganyika Magharibi</p>
+        </header>
         
-        <div class="box">
-            <h3>Karibu kwenye Mfumo</h3>
-            <p>App yako ipo hewani na inafanya kazi kikamilifu na ufuatiliaji wa GPS!</p>
+        <div class="content">
+            <div class="tagline">{{ tagline }}</div>
+            
+            <div class="card">
+                <h2>Ingia kwenye App</h2>
+                <div id="login-form">
+                    <input type="text" id="username" placeholder="Jina la mtumiaji (mf. Tanganyika)" value="tanganyika">
+                    <input type="password" id="password" placeholder="PIN au Password" value="11223344">
+                    <button onclick="loginApp()">Ingia Sasa</button>
+                </div>
+                <div id="welcome-msg" style="display:none; text-align:center;">
+                    <h3 style="color: green;">Umeingia Salama!</h3>
+                    <p>Karibu kwenye mfumo wa WESTVISION ARTS.</p>
+                    <button onclick="logoutApp()" style="background: #d9534f;">Toka (Logout)</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Msimbo wa GPS kwa ajili ya kufuatilia eneo la mwanachama -->
+    <!-- Msimbo wa GPS Geolocation Tracking -->
     <script>
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             let lat = position.coords.latitude;
             let lon = position.coords.longitude;
             
-            // Inatuma eneo moja kwa moja kwenye backend ya Flask kimya kimya
             fetch('/api/save-location', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ latitude: lat, longitude: lon })
             });
+        });
+    }
+
+    function loginApp() {
+        let u = document.getElementById('username').value;
+        let p = document.getElementById('password').value;
+        
+        fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.ok) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('welcome-msg').style.display = 'block';
+            } else {
+                alert(data.error || 'Imeshindikana kuingia');
+            }
+        });
+    }
+
+    function logoutApp() {
+        fetch('/api/logout', { method: 'POST' }).then(() => {
+            location.reload();
         });
     }
     </script>
