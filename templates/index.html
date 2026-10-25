@@ -2,311 +2,336 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WESTVISION ARTS</title>
+    
+    <!-- PWA Support kwa Android na iPhone -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#4a0e4e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WESTVISION">
+    
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         :root {
-            --bg-obsidian: #08070b;
-            --panel-bg: rgba(18, 16, 26, 0.85);
-            --neon-gold: #f3e5ab;
-            --neon-cyan: #00f3ff;
-            --neon-magenta: #ff007f;
-            --neon-purple: #9d00ff;
-            --text-main: #e2e8f0;
+            --primary: #4a0e4e;
+            --primary-dark: #350938;
+            --accent: #d4af37;
+            --bg-light: #e5ddd5;
+            --chat-bg: #f0f2f5;
+            --msg-out: #dcf8c6;
+            --msg-in: #ffffff;
+            --text-dark: #111b21;
+            --text-muted: #667781;
         }
 
         * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-obsidian);
-            color: var(--text-main);
+        html, body {
             margin: 0; padding: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Animated Canvas Background */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+            width: 100%; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--chat-bg);
+            color: var(--text-dark);
+            overflow: hidden;
         }
 
         .app-container {
-            max-width: 480px;
-            margin: 0 auto;
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            border-left: 1px solid rgba(255,255,255,0.1);
-            border-right: 1px solid rgba(255,255,255,0.1);
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 30px rgba(157, 0, 255, 0.2);
+            background: #fff;
         }
 
         header {
-            background: linear-gradient(135deg, #1a0b2e, #0f051d);
-            padding: 18px;
-            text-align: center;
-            border-bottom: 2px solid var(--neon-magenta);
-            position: relative;
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
         }
 
-        /* Glowing text color changing */
         header h1 {
             margin: 0;
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: colorGlow 6s ease infinite;
-        }
-
-        @keyframes colorGlow {
-            0% { filter: drop-shadow(0 0 2px var(--neon-cyan)); }
-            50% { filter: drop-shadow(0 0 8px var(--neon-magenta)); }
-            100% { filter: drop-shadow(0 0 2px var(--neon-cyan)); }
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
         }
 
         header p {
-            margin: 5px 0 0;
+            margin: 2px 0 0;
             font-size: 11px;
-            color: #a0aec0;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            color: var(--accent);
         }
 
         .nav-tabs {
             display: flex;
-            background: rgba(10, 5, 20, 0.9);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: var(--primary-dark);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 14px;
-            color: #a0aec0;
+            padding: 12px;
+            color: #d1d5db;
             background: none;
             border: none;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
         }
 
         .tab-btn.active {
-            color: var(--neon-cyan);
-            background: rgba(0, 243, 255, 0.08);
-            border-bottom: 3px solid var(--neon-cyan);
-            text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+            color: #fff;
+            border-bottom-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .content {
-            padding: 15px;
+        .content-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
+            overflow: hidden;
+            position: relative;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 15px;
+        /* LOGIN SCREEN */
+        #section-login {
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4a0e4e, #1a0b2e);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            padding: 25px;
             border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 22px;
         }
 
         input, textarea {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
             outline: none;
-            transition: border 0.3s;
+            color: var(--text-dark);
+            background: #fff;
         }
 
         input:focus, textarea:focus {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+            border-color: var(--primary);
         }
 
-        .cyber-btn {
+        .btn-main {
             width: 100%;
             padding: 12px;
-            margin: 8px 0;
-            background: linear-gradient(135deg, var(--neon-magenta), var(--neon-purple));
+            margin-top: 10px;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
-            transition: transform 0.1s, box-shadow 0.3s;
         }
 
-        .cyber-btn:active { transform: scale(0.98); }
-        .cyber-btn:hover { box-shadow: 0 0 25px rgba(255, 0, 127, 0.8); }
+        .btn-main:active { background: var(--primary-dark); }
 
-        /* Chat Room Styling */
+        /* CHAT VIEW */
+        #tab-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-light);
+            height: 100%;
+        }
+
         #chat-messages {
             flex: 1;
-            min-height: 320px;
-            max-height: 420px;
+            padding: 15px;
             overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.3);
-            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .msg-bubble {
-            background: rgba(255,255,255,0.06);
-            border-left: 3px solid var(--neon-cyan);
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-size: 13px;
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: var(--msg-in);
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            align-self: flex-start;
+            position: relative;
+            word-break: break-word;
         }
 
-        .msg-bubble strong {
-            color: var(--neon-cyan);
-            display: block;
-            font-size: 11px;
+        .msg-bubble.my-msg {
+            align-self: flex-end;
+            background: var(--msg-out);
+        }
+
+        .msg-username {
+            font-weight: bold;
+            font-size: 12px;
+            color: var(--primary);
             margin-bottom: 3px;
+            display: block;
         }
 
         .msg-time {
-            font-size: 9px;
-            color: #718096;
+            font-size: 10px;
+            color: var(--text-muted);
             float: right;
+            margin-top: 4px;
+            margin-left: 8px;
         }
 
-        /* Announcements Feed */
+        .chat-input-bar {
+            padding: 10px;
+            background: #f0f2f5;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-top: 1px solid #d1d7db;
+        }
+
+        .chat-input-bar input {
+            margin: 0;
+            border-radius: 20px;
+            border: 1px solid #fff;
+            padding: 10px 15px;
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* ANNOUNCEMENTS VIEW */
+        #tab-announcements {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
         .ann-card {
-            background: rgba(20, 10, 35, 0.7);
-            border: 1px solid var(--neon-gold);
-            border-left: 4px solid var(--neon-gold);
-            padding: 12px;
+            background: #fff;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
-        .ann-card h4 { margin: 0 0 5px; color: var(--neon-gold); font-size: 15px; }
-        .ann-card p { margin: 0; font-size: 13px; color: #cbd5e0; }
-        
+        .ann-card h4 { margin: 0 0 6px 0; color: var(--primary); font-size: 16px; }
+        .ann-card p { margin: 0; font-size: 14px; color: #333; line-height: 1.4; }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <!-- Live Particle Background -->
-    <canvas id="bg-canvas"></canvas>
-
     <div class="app-container">
+        <!-- HEADER -->
         <header>
-            <h1>WESTVISION ARTS</h1>
-            <p>Tanzania Cyber Studio & Live Media</p>
+            <div>
+                <h1>WESTVISION ARTS</h1>
+                <p>Tanganyika Magharibi</p>
+            </div>
+            <div id="user-display" style="font-size: 12px; font-weight: bold;"></div>
         </header>
 
-        <!-- LOGIN SCREEN -->
-        <div id="section-login" class="content" style="justify-content: center;">
-            <div class="glass-card">
-                <h3 style="margin-top:0; color: var(--neon-cyan); text-align: center;">MFUMO WA KISASA</h3>
-                <input type="text" id="username" placeholder="Jina la Mtumiaji" value="tanganyika">
-                <input type="password" id="password" placeholder="PIN ya Kuingia" value="11223344">
-                <button class="cyber-btn" onclick="loginApp()">ANZA KUTUMIA APP</button>
-            </div>
-        </div>
-
-        <!-- MAIN DASHBOARD -->
-        <div id="section-app" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
-            <div class="nav-tabs">
-                <button class="tab-btn active" onclick="switchTab('chat')">Live Chat</button>
-                <button class="tab-btn" onclick="switchTab('announcements')">Matangazo</button>
-            </div>
-
-            <!-- CHAT TAB -->
-            <div id="tab-chat" class="content">
-                <div id="chat-messages"></div>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="chat-input" placeholder="Andika ujumbe wa kisasa..." onkeypress="if(event.key==='Enter') sendGroupMessage()" style="margin:0;">
-                    <button class="cyber-btn" onclick="sendGroupMessage()" style="width: 70px; margin:0; padding:0;">Tuma</button>
+        <div class="content-area">
+            <!-- LOGIN SCREEN -->
+            <div id="section-login">
+                <div class="login-card">
+                    <h2>Ingia kwenye App</h2>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Weka taarifa zako kuanza kuchat na kuona matangazo</p>
+                    <input type="text" id="username" placeholder="Jina la mtumiaji" value="tanganyika">
+                    <input type="password" id="password" placeholder="PIN au Password" value="11223344">
+                    <button class="btn-main" onclick="loginApp()">INGIA SASA</button>
                 </div>
             </div>
 
-            <!-- ANNOUNCEMENTS TAB -->
-            <div id="tab-announcements" class="content hidden">
-                <div class="glass-card">
-                    <h4 style="margin:0 0 10px; color: var(--neon-gold);">Weka Tangazo Jipya</h4>
-                    <input type="text" id="ann-title" placeholder="Kichwa cha Tangazo">
-                    <textarea id="ann-text" placeholder="Andika maelezo ya tangazo..." rows="2"></textarea>
-                    <input type="text" id="ann-link" placeholder="Link ya kazi (https://...)">
-                    <button class="cyber-btn" onclick="createAnnouncement()">Chapisha Tangazo</button>
+            <!-- MAIN DASHBOARD -->
+            <div id="section-app" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column;">
+                <div class="nav-tabs">
+                    <button class="tab-btn active" onclick="switchTab('chat')">Group Chat</button>
+                    <button class="tab-btn" onclick="switchTab('announcements')">Matangazo</button>
                 </div>
-                <div id="announcements-list"></div>
+
+                <!-- CHAT TAB -->
+                <div id="tab-chat">
+                    <div id="chat-messages"></div>
+                    <div class="chat-input-bar">
+                        <input type="text" id="chat-input" placeholder="Andika ujumbe..." onkeypress="if(event.key==='Enter') sendGroupMessage()">
+                        <button class="send-btn" onclick="sendGroupMessage()">Tuma</button>
+                    </div>
+                </div>
+
+                <!-- ANNOUNCEMENTS TAB -->
+                <div id="tab-announcements" class="hidden">
+                    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                        <h4 style="margin:0 0 10px 0; color:var(--primary);">Weka Tangazo Jipya</h4>
+                        <input type="text" id="ann-title" placeholder="Kichwa cha Tangazo">
+                        <textarea id="ann-text" placeholder="Maelezo..." rows="2"></textarea>
+                        <input type="text" id="ann-link" placeholder="Link ya kazi (https://...)">
+                        <button class="btn-main" onclick="createAnnouncement()">Chapisha Tangazo</button>
+                    </div>
+                    <h3 style="font-size:15px; color:var(--primary); margin-bottom:10px;">Matangazo ya Hivi Karibuni</h3>
+                    <div id="announcements-list"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Futuristic Animated Background Canvas
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
         }
-        window.onresize = resizeCanvas;
-        resizeCanvas();
-
-        for(let i=0; i<40; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 1.5,
-                speedY: (Math.random() - 0.5) * 0.5,
-                speedX: (Math.random() - 0.5) * 0.5
-            });
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
-            particles.forEach(p => {
-                p.x += p.speedX;
-                p.y += p.speedY;
-                if(p.x < 0) p.x = canvas.width;
-                if(p.x > canvas.width) p.x = 0;
-                if(p.y < 0) p.y = canvas.height;
-                if(p.y > canvas.height) p.y = 0;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
 
         let socket = null;
+        let currentUser = '';
 
         window.onload = function() {
             fetch('/api/me').then(res => res.json()).then(data => {
-                if (data.auth) showAppUI();
+                if (data.auth) {
+                    currentUser = data.username;
+                    showAppUI();
+                }
             });
         };
 
@@ -321,16 +346,22 @@
             })
             .then(res => res.json())
             .then(data => {
-                if(data.ok) showAppUI();
-                else alert(data.error || 'Imeshindikana kuingia');
+                if(data.ok) {
+                    currentUser = data.username;
+                    showAppUI();
+                } else {
+                    alert(data.error || 'Imeshindikana kuingia');
+                }
             });
         }
 
         function showAppUI() {
             document.getElementById('section-login').classList.add('hidden');
             document.getElementById('section-app').classList.remove('hidden');
+            document.getElementById('user-display').innerText = currentUser;
             
             initGPS();
+
             socket = io();
             socket.emit('join');
 
@@ -381,8 +412,9 @@
         function appendMessage(msg) {
             let box = document.getElementById('chat-messages');
             let div = document.createElement('div');
-            div.className = 'msg-bubble';
-            div.innerHTML = `<strong>${msg.username}</strong> ${msg.text || ''} <span class="msg-time">${msg.time}</span>`;
+            let isMine = msg.username === currentUser;
+            div.className = 'msg-bubble' + (isMine ? ' my-msg' : '');
+            div.innerHTML = `<span class="msg-username">${msg.username}</span> ${msg.text || ''} <span class="msg-time">${msg.time}</span>`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
@@ -393,6 +425,13 @@
             if(!text) return;
 
             if(socket) socket.emit('group_message', { text: text });
+            else {
+                fetch('/api/messages', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: text })
+                });
+            }
             input.value = '';
         }
 
@@ -425,8 +464,8 @@
                     d.innerHTML = `
                         <h4>${item.title || 'Tangazo'}</h4>
                         <p>${item.text || ''}</p>
-                        ${item.link ? `<a href="${item.link}" target="_blank" style="color:var(--neon-cyan); font-size:12px; display:inline-block; margin-top:5px;">Fungua Link ya Kazi</a>` : ''}
-                        <div style="font-size:9px; color:#a0aec0; margin-top:6px;">Imetumwa na: ${item.username} - ${item.timestr}</div>
+                        ${item.link ? `<a href="${item.link}" target="_blank" style="color:var(--primary); font-size:13px; font-weight:bold; display:inline-block; margin-top:5px;">Fungua Link</a>` : ''}
+                        <div style="font-size:10px; color:#888; margin-top:6px;">Imetumwa na: ${item.username} - ${item.timestr}</div>
                     `;
                     list.appendChild(d);
                 });
