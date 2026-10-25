@@ -2,7 +2,7 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WESTVISION ARTS</title>
     
     <link rel="manifest" href="/manifest.webmanifest">
@@ -26,41 +26,32 @@
         
         html, body {
             margin: 0; padding: 0;
-            width: 100%; height: 100%;
+            width: 100vw; height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #1a0b2e;
+            background-color: var(--primary-dark);
             color: var(--text-main);
             overflow: hidden;
-        }
-
-        .app-wrapper {
-            width: 100%;
-            max-width: 600px;
-            height: 100%;
-            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            background: #ffffff;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         /* HEADER */
         header {
             background: var(--primary);
             color: #ffffff;
-            padding: 14px 16px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             z-index: 20;
             flex-shrink: 0;
+            width: 100%;
         }
 
         header h1 {
             margin: 0;
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 800;
             color: #ffffff;
             letter-spacing: 0.5px;
@@ -68,7 +59,7 @@
 
         header p {
             margin: 2px 0 0;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--accent);
             font-weight: 600;
         }
@@ -78,11 +69,13 @@
             display: flex;
             background: var(--primary-dark);
             flex-shrink: 0;
+            width: 100%;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 13px 4px;
+            padding: 12px 4px;
             color: #d1c4e9;
             background: none;
             border: none;
@@ -96,12 +89,14 @@
         .tab-btn.active {
             color: #ffffff;
             border-bottom-color: var(--accent);
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         /* MAIN CONTENT AREA */
         .main-body {
             flex: 1;
+            width: 100vw;
+            height: calc(100vh - 95px);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -113,12 +108,14 @@
         #section-login {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 30;
+            z-index: 50;
             background: linear-gradient(135deg, #4a0e4e, #1a0b2e);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            width: 100vw;
+            height: 100vh;
         }
 
         .login-card {
@@ -169,14 +166,16 @@
         /* CHAT SECTION */
         #tab-chat {
             flex: 1;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            height: 100%;
             overflow: hidden;
         }
 
         #chat-messages {
             flex: 1;
+            width: 100%;
             padding: 15px;
             overflow-y: auto;
             display: flex;
@@ -224,51 +223,54 @@
         /* STICKER / EMOJI BAR */
         .sticker-bar {
             background: #f0f0f0;
-            padding: 6px 10px;
+            padding: 8px 12px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             overflow-x: auto;
             border-top: 1px solid #dddddd;
             flex-shrink: 0;
+            width: 100%;
         }
 
         .sticker-btn {
-            font-size: 22px;
+            font-size: 24px;
             background: none;
             border: none;
             cursor: pointer;
-            padding: 2px 5px;
-            transition: transform 0.1s;
+            padding: 2px 6px;
+            flex-shrink: 0;
         }
 
         .sticker-btn:active { transform: scale(1.3); }
 
         /* INPUT BAR AT THE BOTTOM */
         .chat-bottom-bar {
-            padding: 10px;
+            padding: 10px 14px;
             background: #ffffff;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
             border-top: 2px solid #cccccc;
             flex-shrink: 0;
+            width: 100%;
         }
 
         .chat-bottom-bar input {
             margin: 0;
             border-radius: 25px;
             border: 2px solid #aaaaaa;
-            padding: 12px 16px;
+            padding: 12px 18px;
             font-size: 16px;
             color: #000000 !important;
             background: #f9f9f9 !important;
+            flex: 1;
         }
 
         .send-btn-round {
             background: var(--primary);
             color: #ffffff;
             border: none;
-            padding: 12px 20px;
+            padding: 12px 24px;
             border-radius: 25px;
             font-weight: bold;
             font-size: 16px;
@@ -279,6 +281,8 @@
         /* ANNOUNCEMENTS & GPS VIEWS */
         #tab-announcements, #tab-gps {
             flex: 1;
+            width: 100%;
+            height: 100%;
             padding: 15px;
             overflow-y: auto;
             background: #f8f9fa;
@@ -301,79 +305,77 @@
     </style>
 </head>
 <body>
-    <div class="app-wrapper">
-        <!-- HEADER -->
-        <header>
-            <div>
-                <h1>WESTVISION ARTS</h1>
-                <p>Tanganyika Magharibi App</p>
+    <!-- HEADER -->
+    <header>
+        <div>
+            <h1>WESTVISION ARTS</h1>
+            <p>Tanganyika Magharibi App</p>
+        </div>
+        <div id="user-display" style="font-size: 14px; font-weight: bold; color: var(--accent);"></div>
+    </header>
+
+    <div class="main-body">
+        <!-- LOGIN OVERLAY -->
+        <div id="section-login">
+            <div class="login-card">
+                <h2>Ingia kwenye App</h2>
+                <p style="font-size: 14px; color: #555; margin-bottom: 15px;">Ingiza taarifa kuanza kuchat na kufuatilia matangazo</p>
+                <input type="text" id="username" placeholder="Jina la mtumiaji" value="tanganyika">
+                <input type="password" id="password" placeholder="PIN au Password" value="11223344">
+                <button class="btn-action" onclick="loginApp()">INGIA SASA</button>
             </div>
-            <div id="user-display" style="font-size: 14px; font-weight: bold; color: var(--accent);"></div>
-        </header>
+        </div>
 
-        <div class="main-body">
-            <!-- LOGIN OVERLAY -->
-            <div id="section-login">
-                <div class="login-card">
-                    <h2>Ingia kwenye App</h2>
-                    <p style="font-size: 14px; color: #555; margin-bottom: 15px;">Ingiza taarifa kuanza kuchat na kufuatilia matangazo</p>
-                    <input type="text" id="username" placeholder="Jina la mtumiaji" value="tanganyika">
-                    <input type="password" id="password" placeholder="PIN au Password" value="11223344">
-                    <button class="btn-action" onclick="loginApp()">INGIA SASA</button>
+        <!-- DASHBOARD CONTAINER -->
+        <div id="section-app" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column;">
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('chat')">Group Chat</button>
+                <button class="tab-btn" onclick="switchTab('announcements')">Matangazo</button>
+                <button class="tab-btn" onclick="switchTab('gps')">GPS Locations</button>
+            </div>
+
+            <!-- 1. GROUP CHAT TAB -->
+            <div id="tab-chat">
+                <div id="chat-messages"></div>
+
+                <!-- STICKERS / EMOJI QUICK SELECT -->
+                <div class="sticker-bar">
+                    <button class="sticker-btn" onclick="sendSticker('🎭')">🎭</button>
+                    <button class="sticker-btn" onclick="sendSticker('🎬')">🎬</button>
+                    <button class="sticker-btn" onclick="sendSticker('🔥')">🔥</button>
+                    <button class="sticker-btn" onclick="sendSticker('👏')">👏</button>
+                    <button class="sticker-btn" onclick="sendSticker('❤️')">❤️</button>
+                    <button class="sticker-btn" onclick="sendSticker('🎨')">🎨</button>
+                    <button class="sticker-btn" onclick="sendSticker('🎤')">🎤</button>
+                    <button class="sticker-btn" onclick="sendSticker('😂')">😂</button>
+                    <button class="sticker-btn" onclick="sendSticker('👍')">👍</button>
+                </div>
+
+                <!-- INPUT BAR -->
+                <div class="chat-bottom-bar">
+                    <input type="text" id="chat-input" placeholder="Andika ujumbe hapa..." onkeypress="if(event.key==='Enter') sendGroupMessage()">
+                    <button class="send-btn-round" onclick="sendGroupMessage()">Tuma</button>
                 </div>
             </div>
 
-            <!-- DASHBOARD CONTAINER -->
-            <div id="section-app" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column;">
-                <div class="nav-tabs">
-                    <button class="tab-btn active" onclick="switchTab('chat')">Group Chat</button>
-                    <button class="tab-btn" onclick="switchTab('announcements')">Matangazo</button>
-                    <button class="tab-btn" onclick="switchTab('gps')">GPS Locations</button>
+            <!-- 2. ANNOUNCEMENTS TAB -->
+            <div id="tab-announcements" class="hidden">
+                <div style="background:#fff; padding:16px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                    <h4 style="margin:0 0 10px 0; color:var(--primary);">Weka Tangazo Jipya</h4>
+                    <input type="text" id="ann-title" placeholder="Kichwa cha Tangazo">
+                    <textarea id="ann-text" placeholder="Maelezo ya tangazo..." rows="3"></textarea>
+                    <input type="text" id="ann-link" placeholder="Link ya kazi (https://...)">
+                    <button class="btn-action" onclick="createAnnouncement()">Chapisha Tangazo</button>
                 </div>
+                <h3 style="font-size:16px; color:var(--primary); margin-bottom:10px;">Matangazo ya Hivi Karibuni</h3>
+                <div id="announcements-list"></div>
+            </div>
 
-                <!-- 1. GROUP CHAT TAB -->
-                <div id="tab-chat">
-                    <div id="chat-messages"></div>
-
-                    <!-- STICKERS / EMOJI QUICK SELECT -->
-                    <div class="sticker-bar">
-                        <button class="sticker-btn" onclick="sendSticker('🎭')">🎭</button>
-                        <button class="sticker-btn" onclick="sendSticker('🎬')">🎬</button>
-                        <button class="sticker-btn" onclick="sendSticker('🔥')">🔥</button>
-                        <button class="sticker-btn" onclick="sendSticker('👏')">👏</button>
-                        <button class="sticker-btn" onclick="sendSticker('❤️')">❤️</button>
-                        <button class="sticker-btn" onclick="sendSticker('🎨')">🎨</button>
-                        <button class="sticker-btn" onclick="sendSticker('🎤')">🎤</button>
-                        <button class="sticker-btn" onclick="sendSticker('😂')">😂</button>
-                        <button class="sticker-btn" onclick="sendSticker('👍')">👍</button>
-                    </div>
-
-                    <!-- INPUT BAR -->
-                    <div class="chat-bottom-bar">
-                        <input type="text" id="chat-input" placeholder="Andika ujumbe hapa..." onkeypress="if(event.key==='Enter') sendGroupMessage()">
-                        <button class="send-btn-round" onclick="sendGroupMessage()">Tuma</button>
-                    </div>
-                </div>
-
-                <!-- 2. ANNOUNCEMENTS TAB -->
-                <div id="tab-announcements" class="hidden">
-                    <div style="background:#fff; padding:16px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-                        <h4 style="margin:0 0 10px 0; color:var(--primary);">Weka Tangazo Jipya</h4>
-                        <input type="text" id="ann-title" placeholder="Kichwa cha Tangazo">
-                        <textarea id="ann-text" placeholder="Maelezo ya tangazo..." rows="3"></textarea>
-                        <input type="text" id="ann-link" placeholder="Link ya kazi (https://...)">
-                        <button class="btn-action" onclick="createAnnouncement()">Chapisha Tangazo</button>
-                    </div>
-                    <h3 style="font-size:16px; color:var(--primary); margin-bottom:10px;">Matangazo ya Hivi Karibuni</h3>
-                    <div id="announcements-list"></div>
-                </div>
-
-                <!-- 3. GPS TAB -->
-                <div id="tab-gps" class="hidden">
-                    <h3 style="font-size:17px; color:var(--primary); margin-top:0;">Taarifa za Maeneo ya GPS</h3>
-                    <div id="gps-status" style="margin-bottom:12px; font-size:14px; color:#444; font-weight:600;">Inatafuta eneo lako...</div>
-                    <div id="gps-locations-list"></div>
-                </div>
+            <!-- 3. GPS TAB -->
+            <div id="tab-gps" class="hidden">
+                <h3 style="font-size:17px; color:var(--primary); margin-top:0;">Taarifa za Maeneo ya GPS</h3>
+                <div id="gps-status" style="margin-bottom:12px; font-size:14px; color:#444; font-weight:600;">Inatafuta eneo lako...</div>
+                <div id="gps-locations-list"></div>
             </div>
         </div>
     </div>
